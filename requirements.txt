@@ -1,0 +1,34 @@
+# 데이터 처리
+pandas
+numpy
+
+# 크롤링
+selenium
+chromedriver-autoinstaller
+beautifulsoup4
+openpyxl
+
+# 자연어 처리
+konlpy
+# MeCab 별도 설치 필요 (Windows: https://github.com/Pusnow/mecab-ko-msvc/releases)
+
+# 토픽 모델링·시각화
+gensim
+pyLDAvis
+
+# 감정 분석 (KoBERT, kcbert-large)
+torch
+transformers
+scikit-learn
+
+# TF-IDF
+# scikit-learn 위에서 같이 사용
+
+# 시각화
+matplotlib
+seaborn
+wordcloud
+Pillow
+
+# 노트북
+jupyter
