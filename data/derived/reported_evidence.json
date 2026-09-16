@@ -1,0 +1,41 @@
+{
+  "source": "reports/구해줘_잡스.pdf",
+  "scope": {
+    "posts": 7255,
+    "collection_start": "2024-05",
+    "collection_end": "2025-05",
+    "survey_total_respondents": 75
+  },
+  "survey_stress_distribution_pct": {
+    "1": 0.0,
+    "2": 14.6,
+    "3": 33.3,
+    "4": 37.5,
+    "5": 14.6
+  },
+  "program_participation_pct": {
+    "participated": 37.3,
+    "not_participated": 62.7
+  },
+  "popular_post_comparison": {
+    "general_mean_negative_intensity": 0.386,
+    "popular_top_10_pct_mean_negative_intensity": 0.475,
+    "t_statistic": 2.202,
+    "p_value": 0.031
+  },
+  "sentiment_model": {
+    "backbone": "beomi/KcELECTRA-base-v2022",
+    "train_size": 537,
+    "validation_size": 135,
+    "best_recorded_validation_loss": 0.600313,
+    "best_recorded_epoch": 3,
+    "accuracy_recorded": false,
+    "macro_f1_recorded": false
+  },
+  "final_lda_topics": [
+    {"topic": 0, "label": "채용 절차 부담", "keywords": ["면접", "준비", "서류", "생각", "회사", "인적성"]},
+    {"topic": 1, "label": "직무·기업 선택", "keywords": ["취업", "기업", "사람", "신입", "직무", "서류"]},
+    {"topic": 2, "label": "조건·경로 불안", "keywords": ["기업", "생각", "취업", "연봉", "공기업", "서울"]},
+    {"topic": 3, "label": "경험·스펙 부족", "keywords": ["인턴", "준비", "직무", "경험", "스펙", "감사"]}
+  ]
+}

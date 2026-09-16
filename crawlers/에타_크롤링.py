@@ -1,107 +1,101 @@
-import os
-import sys
-import time
+"""Archived Selenium collector used during the project.
+
+Run only when the account owner has permission to access and collect the target
+board, and after checking the platform terms and research-ethics requirements.
+Credentials are entered manually in the browser and are never read by this file.
+"""
+
+from __future__ import annotations
+
+import argparse
 import random
-from time import sleep
-import urllib.request
-from urllib.request import urlretrieve
+import time
+from pathlib import Path
 
-import numpy as np
-import pandas as pd
 import chromedriver_autoinstaller
-from bs4 import BeautifulSoup
-from openpyxl import Workbook, load_workbook
-
+import pandas as pd
 from selenium import webdriver
-from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException, UnexpectedAlertPresentException
+from selenium.webdriver.support.ui import WebDriverWait
 
-from wordcloud import WordCloud
-import matplotlib.pyplot as plt
-from PIL import Image
 
-# ChromeDriver 자동 설치 및 경로 설정
-chromedriver_autoinstaller.install()
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Collect authorized Everytime board posts")
+    parser.add_argument("--board-id", required=True, help="Board identifier visible in its URL")
+    parser.add_argument("--max-pages", type=int, default=10, help="Maximum pages to visit")
+    parser.add_argument("--output", type=Path, default=Path("data/raw/everytime_crawling.csv"))
+    parser.add_argument("--min-delay", type=float, default=1.0)
+    parser.add_argument("--max-delay", type=float, default=2.0)
+    parser.add_argument("--headless", action="store_true")
+    args = parser.parse_args()
+    if args.max_pages < 1:
+        parser.error("--max-pages must be at least 1")
+    if args.min_delay < 0 or args.max_delay < args.min_delay:
+        parser.error("delay values must satisfy 0 <= min <= max")
+    return args
 
-# 크롬 옵션 설정 (GUI 안 띄우고 싶다면 headless 사용)
-chrome_options = Options()
-chrome_options.add_argument('--no-sandbox')
-chrome_options.add_argument('--disable-dev-shm-usage')
-chrome_options.add_argument('lang=ko_KR')
-chrome_options.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36')
 
-# 드라이버 실행
-driver = webdriver.Chrome(options=chrome_options)
+def build_driver(headless: bool) -> webdriver.Chrome:
+    chromedriver_autoinstaller.install()
+    options = Options()
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("lang=ko_KR")
+    if headless:
+        options.add_argument("--headless=new")
+    return webdriver.Chrome(options=options)
 
-# 웹페이지 접속
-driver.get('https://everytime.kr/login')
-driver.implicitly_wait(5)
 
-# 로그인 시도
+def collect(args: argparse.Namespace) -> pd.DataFrame:
+    driver = build_driver(args.headless)
+    rows: list[dict[str, object]] = []
+    wait = WebDriverWait(driver, 10)
+    try:
+        driver.get("https://everytime.kr/login")
+        print("브라우저에서 직접 로그인한 뒤 이 콘솔로 돌아오세요.")
+        input("로그인과 수집 권한 확인을 마쳤으면 엔터를 누르세요: ")
 
-#wait = WebDriverWait(driver, 10)
-#login_btn = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'input[type="submit"]')))
-#login_btn.click()
+        for page in range(1, args.max_pages + 1):
+            driver.get(f"https://everytime.kr/{args.board_id}/p/{page}")
+            time.sleep(random.uniform(args.min_delay, args.max_delay))
+            links = [
+                element.get_attribute("href")
+                for element in driver.find_elements(By.CSS_SELECTOR, "article > a.article")
+            ]
+            for link in filter(None, links):
+                driver.get(link)
+                wait.until(EC.presence_of_element_located((By.TAG_NAME, "article")))
+                time.sleep(random.uniform(args.min_delay, args.max_delay))
 
-# 수동 로그인 안내 및 대기
-print("브라우저에서 아이디/비밀번호를 입력하고 로그인 버튼을 눌러주세요.")
-input("로그인 후 이 콘솔에 돌아와 엔터 키를 눌러 계속합니다.")
+                post = driver.find_element(By.TAG_NAME, "article")
+                status = post.find_element(By.CSS_SELECTOR, "ul.status.left")
+                paragraphs = post.find_elements(By.CSS_SELECTOR, "p.large")
+                title = post.find_element(By.CSS_SELECTOR, "h2.large").text
+                rows.append(
+                    {
+                        "content": f"{title} {paragraphs[0].text}" if paragraphs else title,
+                        "comment": [paragraph.text for paragraph in paragraphs[1:]],
+                        "like": status.find_element(By.CSS_SELECTOR, "li.vote").text,
+                        "comment_count": status.find_element(By.CSS_SELECTOR, "li.comment").text,
+                        "scrap": status.find_element(By.CSS_SELECTOR, "li.scrap").text,
+                        "date": post.find_element(By.CSS_SELECTOR, "time.large").text,
+                    }
+                )
+            print(f"page {page}: {len(rows)} posts collected")
+    finally:
+        driver.quit()
+    return pd.DataFrame(rows)
 
-# 에브리타임 크롤링
-dictionary = {}
-page = 0
 
-content_, comment_, like_, comment_count_, scrap_, time_texts = [], [], [], [], [], []
-wait = WebDriverWait(driver, 10)
+def main() -> None:
+    args = parse_args()
+    frame = collect(args)
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    frame.to_csv(args.output, index=False, encoding="utf-8-sig")
+    print(f"Saved {len(frame)} rows to {args.output}")
 
-while True:
-    print('page', page)
-    if page > 499:
-        break
-    page += 1
-    driver.get(f"https://everytime.kr/375120/p/{page}")
-    sleep(1)
 
-    posts = driver.find_elements(By.CSS_SELECTOR, 'article > a.article')
-    links = [p.get_attribute('href') for p in posts]
-
-    for link in links:
-        driver.get(link)
-        wait.until(EC.presence_of_element_located((By.TAG_NAME, 'article')))
-        sleep(0.5)
-
-        post = driver.find_element(By.TAG_NAME, 'article')
-        status = post.find_element(By.CSS_SELECTOR, 'ul.status.left')
-
-        like_.append(status.find_element(By.CSS_SELECTOR, 'li.vote').text)
-        comment_count_.append(status.find_element(By.CSS_SELECTOR, 'li.comment').text)
-        scrap_.append(status.find_element(By.CSS_SELECTOR, 'li.scrap').text)
-
-        time_texts.append(post.find_element(By.CSS_SELECTOR, 'time.large').text)
-
-        title = post.find_element(By.CSS_SELECTOR, 'h2.large').text
-        paras = post.find_elements(By.CSS_SELECTOR, 'p.large')
-        comment_list = []
-        for i, p in enumerate(paras):
-            if i == 0:
-                content_.append(f"{title} {p.text}")
-            else:
-                comment_list.append(p.text)
-        comment_.append(comment_list)
-
-# DataFrame 구성
-df = pd.DataFrame({
-    'content':       content_,
-    'comment':       comment_,
-    'like':          like_,
-    'comment_count': comment_count_,
-    'scrap':         scrap_,
-    'date':          time_texts
-})
-
-df.to_csv('everytime_crawling.csv', index=False)
-print("크롤링 완료: everytime_crawling.csv로 저장되었습니다.")
+if __name__ == "__main__":
+    main()

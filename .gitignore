@@ -39,6 +39,11 @@ desktop.ini
 *.log
 *.tmp
 .cache/
+tmp/
+results/
+logs/
+kcbert_model/
+kcbert_emotion_model/
 
 # ============================================
 # 개인정보·행정 (혹시 다시 들어와도 차단)
