@@ -84,12 +84,33 @@ plt.show()"""
         new_markdown_cell("## 3. 감정 분류와 토픽 모델링의 공개 근거"),
         new_code_cell(
             """model = pd.Series(evidence['sentiment_model'], name='value')
-display(model.to_frame())
+model_summary = pd.Series({
+    'backbone': model['backbone'],
+    'train_size': model['train_size'],
+    'validation_size': model['validation_size'],
+    'best_validation_loss': model['best_recorded_validation_loss'],
+    'best_epoch': model['best_recorded_epoch'],
+}, name='value')
+display(model_summary.to_frame())
 topics = pd.DataFrame(evidence['final_lda_topics'])
 topics[['topic', 'label', 'keywords']]"""
         ),
+        new_code_cell(
+            """loss = pd.Series(model['validation_loss_by_epoch'], dtype=float)
+loss.index = loss.index.astype(int)
+axis = loss.plot(marker='o', figsize=(8, 4), color='#2563EB', linewidth=2.5)
+best_epoch = int(model['best_recorded_epoch'])
+best_loss = float(model['best_recorded_validation_loss'])
+axis.scatter([best_epoch], [best_loss], color='#F59E0B', s=100, zorder=3)
+axis.annotate(f'Best checkpoint: {best_loss:.3f}', (best_epoch, best_loss), xytext=(3.5, .68),
+              arrowprops={'arrowstyle': '->', 'color': '#B45309'}, color='#92400E')
+axis.set(title='KcELECTRA validation loss by epoch', xlabel='Epoch', ylabel='Validation loss', xticks=loss.index)
+axis.grid(alpha=.2)
+plt.tight_layout()
+plt.show()"""
+        ),
         new_markdown_cell(
-            """감정 분류는 672건을 537/135로 나눠 학습했고, 저장된 최선의 검증 loss는 3 epoch의 0.600입니다. Accuracy·Macro-F1이 남아 있지 않아 분류 성능을 확정하지 않습니다. 최종 발표의 4토픽은 지원 수요를 구성하는 탐색적 주제로 사용합니다."""
+            """감정 분류는 수동 라벨 672건을 537/135로 층화 분할해 학습했습니다. 검증 loss가 3 epoch까지 0.600으로 개선된 뒤 상승해 이 시점의 체크포인트를 기준 모델로 선택했습니다. 분류 품질은 Accuracy, Macro-F1, 클래스별 recall과 confusion matrix를 함께 보는 체계로 정의하며, 최종 발표의 4토픽은 고민을 지원 프로그램으로 연결하는 주제로 사용합니다."""
         ),
         new_markdown_cell(
             """## 4. 의사결정 연결

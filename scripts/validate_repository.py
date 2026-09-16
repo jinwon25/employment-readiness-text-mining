@@ -58,11 +58,19 @@ def validate_evidence() -> None:
         raise AssertionError("Final LDA topic count must be four")
 
 
+def validate_public_scope() -> None:
+    private_artifacts = [ROOT / "reports" / "구해줘_잡스_참가보고서.hwp"]
+    exposed = [path.relative_to(ROOT) for path in private_artifacts if path.exists()]
+    if exposed:
+        raise AssertionError(f"Private application artifacts must not be public: {exposed}")
+
+
 def main() -> None:
     validate_links()
     validate_python()
     validate_notebook()
     validate_evidence()
+    validate_public_scope()
     print("Portfolio artifacts validated")
 
 

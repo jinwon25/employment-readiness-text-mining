@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE = ROOT / "data" / "derived" / "reported_evidence.json"
 OUTPUT = ROOT / "visualizations" / "key_evidence.png"
+MODEL_OUTPUT = ROOT / "visualizations" / "sentiment_validation.png"
 
 
 def build() -> Path:
@@ -55,6 +56,46 @@ def build() -> Path:
     fig.tight_layout()
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(OUTPUT, dpi=180, bbox_inches="tight", facecolor=fig.get_facecolor())
+    plt.close(fig)
+
+    model = evidence["sentiment_model"]
+    loss_by_epoch = model["validation_loss_by_epoch"]
+    epochs = [int(epoch) for epoch in loss_by_epoch]
+    losses = list(loss_by_epoch.values())
+    best_epoch = model["best_recorded_epoch"]
+    best_loss = model["best_recorded_validation_loss"]
+
+    fig, axis = plt.subplots(figsize=(8.5, 4.5))
+    fig.patch.set_facecolor("#F8FAFC")
+    axis.set_facecolor("#F8FAFC")
+    axis.plot(epochs, losses, marker="o", linewidth=2.5, color="#2563EB")
+    axis.scatter([best_epoch], [best_loss], s=110, color="#F59E0B", zorder=3)
+    axis.annotate(
+        f"Best checkpoint\nepoch {best_epoch} · loss {best_loss:.3f}",
+        xy=(best_epoch, best_loss),
+        xytext=(best_epoch + 0.45, best_loss + 0.055),
+        arrowprops={"arrowstyle": "->", "color": "#B45309"},
+        color="#92400E",
+        weight="bold",
+    )
+    axis.set(
+        title="KcELECTRA validation loss by epoch",
+        xlabel="Epoch",
+        ylabel="Validation loss",
+        xticks=epochs,
+        ylim=(0.55, 0.79),
+    )
+    axis.grid(alpha=0.18)
+    fig.text(
+        0.5,
+        -0.01,
+        "Validation split: 135 manually labelled posts · stratified split · random_state=42",
+        ha="center",
+        color="#475569",
+        fontsize=9,
+    )
+    fig.tight_layout()
+    fig.savefig(MODEL_OUTPUT, dpi=180, bbox_inches="tight", facecolor=fig.get_facecolor())
     plt.close(fig)
     return OUTPUT
 

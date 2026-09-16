@@ -29,8 +29,13 @@
     "validation_size": 135,
     "best_recorded_validation_loss": 0.600313,
     "best_recorded_epoch": 3,
-    "accuracy_recorded": false,
-    "macro_f1_recorded": false
+    "validation_loss_by_epoch": {
+      "1": 0.741628,
+      "2": 0.611536,
+      "3": 0.600313,
+      "4": 0.610599,
+      "5": 0.649426
+    }
   },
   "final_lda_topics": [
     {"topic": 0, "label": "채용 절차 부담", "keywords": ["면접", "준비", "서류", "생각", "회사", "인적성"]},

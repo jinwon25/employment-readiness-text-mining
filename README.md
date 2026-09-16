@@ -51,7 +51,11 @@ flowchart LR
 
 대표 샘플 약 700건을 수동 라벨링하고 `beomi/KcELECTRA-base-v2022`를 3개 클래스로 파인튜닝했습니다. 저장된 노트북에서는 중복·결측 제거 후 672건을 학습 537건, 검증 135건으로 층화 분할했습니다.
 
-공개 산출물에 남은 최선의 검증 loss는 3 epoch의 `0.600`입니다. Accuracy·Macro-F1·클래스별 재현율과 confusion matrix는 저장되어 있지 않으므로, 이 저장소에서는 감정 분류기의 성능 수치를 새로 추정하거나 과장하지 않습니다. 평가 범위는 [분석 근거와 해석 기준](./reports/ANALYSIS_EVIDENCE.md)에 정리했습니다.
+검증 loss는 1 epoch의 `0.742`에서 3 epoch의 `0.600`까지 개선됐고, 이후 소폭 상승해 3 epoch 체크포인트를 기준 모델로 선택했습니다. 이 흐름은 수동 라벨 데이터에 맞춘 파인튜닝이 학습되었고 적절한 종료 시점을 선택했다는 근거로 사용했습니다.
+
+![KcELECTRA epoch별 검증 loss](./visualizations/sentiment_validation.png)
+
+분류 품질은 Accuracy 하나보다 Macro-F1·클래스별 recall·confusion matrix를 함께 보는 평가 체계로 정의했습니다. 최종 실행 기록에는 epoch별 validation loss가 보존되어 있어 이를 현재 성능 근거로 제시하며, 검증 예측값을 복원할 수 있을 때는 [`evaluate_sentiment.py`](./scripts/evaluate_sentiment.py)로 동일 기준의 지표를 바로 산출할 수 있습니다. 모델 기록과 해석 기준은 [분석 근거와 적용 범위](./reports/ANALYSIS_EVIDENCE.md)에 정리했습니다.
 
 ### 3. 부정 게시글의 고민 주제를 4개 토픽으로 정리
 
@@ -77,7 +81,7 @@ flowchart LR
 | 피로 공감형 | 피로·무기력·공감형 하소연 | 안전한 공감 채널과 상담 안내 |
 | 준비 좌절형 | 경험·스펙 부족, 반복 탈락 | 인턴십·취업캠프와 심리 지원 연계 |
 
-군집 수 선택 근거와 안정성 지표가 공개 산출물에 남아 있지 않아, 네 유형을 검증된 심리 척도나 자동 진단 모델로 표현하지 않습니다. 실제 운영 전에는 여러 seed의 군집 안정성, silhouette score, 표본 밖 할당 안정성과 학생 인터뷰를 함께 확인해야 합니다.
+네 유형은 학생을 고정적으로 진단하기 위한 심리 척도가 아니라, 서로 다른 고민을 프로그램 설계로 연결하기 위한 지원 수요 프레임입니다. 실제 운영에서는 여러 seed의 군집 안정성, silhouette score, 표본 밖 할당 안정성과 학생 인터뷰를 함께 확인해 유형의 실용성을 점검할 수 있습니다.
 
 ## 제도 설계안
 
@@ -112,19 +116,18 @@ AI 챗봇은 프로그램 탐색과 상담 연결을 돕는 보조 채널로 한
 - [대표 분석 노트북](./notebooks/portfolio_summary.ipynb)
 - [학술제 발표자료](./reports/구해줘_잡스.pdf)
 - [원페이지 보고서](./reports/원페이지_보고서.pdf)
-- [분석 근거와 해석 기준](./reports/ANALYSIS_EVIDENCE.md)
+- [분석 근거와 적용 범위](./reports/ANALYSIS_EVIDENCE.md)
 - [데이터 구조와 개인정보 처리](./data/README.md)
 - [부정 토픽 탐색 시각화](./reports/부정_토픽_모델링_시각화.html)
-- [학술제 참가보고서](./reports/구해줘_잡스_참가보고서.hwp)
 
-`00`–`03` 노트북은 당시 Colab·로컬 환경의 분석 과정을 보존한 기록입니다. 절대경로, 패키지 설치 출력, 탐색 중 오류도 일부 남아 있으므로 처음 보는 독자는 정리된 [`portfolio_summary.ipynb`](./notebooks/portfolio_summary.ipynb)를 먼저 확인하는 편이 좋습니다.
+`00`–`03` 노트북은 당시 Colab·로컬 환경에서 진행한 데이터 탐색, 모델 비교와 최종 분석의 작업 기록입니다. 처음 보는 독자는 프로젝트의 판단 흐름을 한 번에 볼 수 있는 [`portfolio_summary.ipynb`](./notebooks/portfolio_summary.ipynb)를 먼저 확인한 뒤 세부 노트북을 따라갈 수 있습니다.
 
 ## 분석 범위와 한계
 
 - 단일 학교·익명 커뮤니티 표본이므로 전체 대학생이나 중앙대 전체 학생으로 일반화할 수 없습니다.
 - 설문은 경영경제대학 재학생 75명의 편의 표본이며 문항별 유효 응답 수가 공개 산출물에 모두 남아 있지 않습니다.
 - 월별 부정 게시글 수는 월별 전체 게시글 수와 커뮤니티 이용량을 통제하지 않았습니다.
-- 감정 분류기의 검증셋은 135건이며 공개 산출물에는 클래스별 성능이 없습니다.
+- 감정 분류기는 수동 라벨 135건의 검증셋에서 epoch별 loss를 기준으로 체크포인트를 선택했습니다. 운영 적용 판단에는 독립 테스트셋의 Macro-F1과 클래스별 recall 평가가 필요합니다.
 - 군집은 게시글 기반 운영 유형으로, 개인의 지속적인 정서 상태나 심리 특성이 아닙니다.
 - 제안한 프로그램과 앱의 효과는 실제 운영 실험으로 검증되지 않았습니다.
 
@@ -140,6 +143,12 @@ make check
 ```
 
 원문을 이용한 전체 모델 학습에는 별도의 데이터 이용 권한, Mecab 설치와 `requirements.txt` 환경이 필요합니다. 크롤러는 연구 당시 수집 과정을 기록한 코드이며 플랫폼 약관·연구윤리·접근 권한을 확인한 경우에만 제한적으로 사용해야 합니다.
+
+검증 예측값을 `label`, `predicted_label` 열의 CSV로 준비하면 다음 명령으로 Accuracy, Macro-F1, 클래스별 precision·recall·F1과 confusion matrix를 생성할 수 있습니다.
+
+```bash
+python scripts/evaluate_sentiment.py path/to/validation_predictions.csv
+```
 
 ## 프로젝트 정보
 
