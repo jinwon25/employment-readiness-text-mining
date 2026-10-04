@@ -1,4 +1,4 @@
-"""Validate public portfolio artifacts without private source text."""
+"""원문 없이 공개 집계와 노트북 공개 범위를 검증합니다."""
 
 from __future__ import annotations
 
@@ -59,6 +59,15 @@ def validate_evidence() -> None:
 
 
 def validate_public_scope() -> None:
+    for path in (ROOT / "notebooks").glob("*.ipynb"):
+        if path.name == "portfolio_summary.ipynb":
+            continue
+        notebook = json.loads(path.read_text(encoding="utf-8"))
+        for cell in notebook["cells"]:
+            if cell.get("cell_type") == "code" and (
+                cell.get("outputs") or cell.get("execution_count") is not None
+            ):
+                raise AssertionError(f"원문 노트북 출력은 비워야 합니다: {path.name}")
     private_artifacts = [ROOT / "reports" / "구해줘_잡스_참가보고서.hwp"]
     exposed = [path.relative_to(ROOT) for path in private_artifacts if path.exists()]
     if exposed:
@@ -71,7 +80,7 @@ def main() -> None:
     validate_notebook()
     validate_evidence()
     validate_public_scope()
-    print("Portfolio artifacts validated")
+    print("공개 집계·파일 구조·노트북 공개 범위 검증 완료")
 
 
 if __name__ == "__main__":

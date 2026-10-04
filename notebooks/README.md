@@ -10,4 +10,4 @@
 | `02_부정_토픽_모델링.ipynb` | 부정 게시글 LDA·BERTopic 탐색 | 최종 4토픽과 탐색용 3토픽 포함 |
 | `03_감정_분류.ipynb` | KcELECTRA 수동 라벨 학습·전체 예측 | 비공개 원문과 저장 모델 필요 |
 
-기존 노트북은 학술제 당시의 분석 흐름과 모델 비교 과정을 보여 주기 위해 그대로 보존했습니다. 프로젝트의 핵심 결과와 적용 범위는 [`../reports/ANALYSIS_EVIDENCE.md`](../reports/ANALYSIS_EVIDENCE.md)에서 한 번에 확인할 수 있습니다.
+기존 노트북은 당시 코드와 분석 흐름을 보존하되, 개인 원문이 담긴 출력과 실행 번호는 과거 커밋에서도 제거했습니다. 학습 loss와 최종 토픽 등 공개 집계는 `data/derived/reported_evidence.json`과 대표 노트북에 보존했습니다. 프로젝트의 핵심 결과와 적용 범위는 [`../reports/ANALYSIS_EVIDENCE.md`](../reports/ANALYSIS_EVIDENCE.md)에서 한 번에 확인할 수 있습니다.

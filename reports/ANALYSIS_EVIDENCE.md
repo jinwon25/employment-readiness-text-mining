@@ -39,11 +39,11 @@
 4. 라벨러 2인 이상의 합치도와 데이터 중복·유사 문장 점검
 5. 운영 시점에는 월별 클래스 비율과 calibration 안정성 모니터링
 
-현재 보존된 최종 KcELECTRA 실행 출력은 validation loss 중심입니다. 검증 예측값 또는 학습 체크포인트가 확보되면 [`scripts/evaluate_sentiment.py`](../scripts/evaluate_sentiment.py)로 Accuracy, Macro-F1, 클래스별 지표와 confusion matrix를 같은 기준에서 생성할 수 있습니다. 확인되지 않은 분류 지표를 loss에서 역산하지 않고, 보존된 결과와 재계산 가능한 평가 절차를 구분했습니다.
+공개 집계 기록인 `data/derived/reported_evidence.json`에 보존된 최종 KcELECTRA 성능 근거는 validation loss 중심입니다. 원문이 담긴 기존 노트북의 출력은 제거했습니다. 검증 예측값 또는 학습 체크포인트가 확보되면 [`scripts/evaluate_sentiment.py`](../scripts/evaluate_sentiment.py)로 Accuracy, Macro-F1, 클래스별 지표와 confusion matrix를 같은 기준에서 생성할 수 있습니다. 확인되지 않은 분류 지표를 loss에서 역산하지 않고, 보존된 결과와 재계산 가능한 평가 절차를 구분했습니다.
 
 ## 토픽 모델링 버전
 
-최종 발표의 네 토픽은 `02_부정_토픽_모델링.ipynb`의 scikit-learn `LatentDirichletAllocation(n_components=4, random_state=42)` 출력과 일치합니다.
+최종 발표의 네 토픽은 `02_부정_토픽_모델링.ipynb`의 scikit-learn `LatentDirichletAllocation(n_components=4, random_state=42)` 구성과 당시 공개 집계 기록에 근거합니다.
 
 `reports/부정_토픽_모델링_시각화.html`은 같은 노트북에서 비교한 Gensim `num_topics=3` 탐색 결과입니다. 최종 결과는 coherence와 해석 가능성을 함께 고려한 4토픽 scikit-learn LDA이며, HTML은 토픽 수를 탐색한 작업 과정으로 보존했습니다. BERTopic 결과까지 비교한 뒤 이 데이터에서는 최종 4토픽 LDA가 지원 수요를 설명하는 데 가장 적합하다고 판단했습니다.
 

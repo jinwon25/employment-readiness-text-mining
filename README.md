@@ -1,5 +1,7 @@
 # 취업 준비 과정의 감정 데이터 분석과 지원 제도 설계
 
+![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white) [![코드 라이선스: MIT](https://img.shields.io/badge/License-MIT-3DA639)](LICENSE) [![검증](https://github.com/jinwon25/employment-readiness-text-mining/actions/workflows/checks.yml/badge.svg?branch=main)](https://github.com/jinwon25/employment-readiness-text-mining/actions/workflows/checks.yml)
+
 에브리타임 취업·진로 게시글 7,255건과 중앙대학교 경영경제대학 재학생 설문을 결합해 **학생들이 언제, 무엇 때문에 어려움을 느끼는지** 분석하고 맞춤형 취업 지원 방안을 제안한 텍스트 마이닝 프로젝트입니다.
 
 > 중앙대학교 경영경제대학 학술제 장려상 수상 · 2025년 4인 팀 프로젝트
@@ -49,13 +51,13 @@ flowchart LR
 
 ### 2. KcELECTRA로 긍정·중립·부정을 분류
 
-대표 샘플 약 700건을 수동 라벨링하고 `beomi/KcELECTRA-base-v2022`를 3개 클래스로 파인튜닝했습니다. 저장된 노트북에서는 중복·결측 제거 후 672건을 학습 537건, 검증 135건으로 층화 분할했습니다.
+대표 샘플 약 700건을 수동 라벨링하고 [`beomi/KcELECTRA-base-v2022`](https://huggingface.co/beomi/KcELECTRA-base-v2022)를 3개 클래스로 파인튜닝했습니다. 공개 집계로 보존한 학습 기록에서는 중복·결측 제거 후 672건을 학습 537건, 검증 135건으로 층화 분할했습니다.
 
 검증 loss는 1 epoch의 `0.742`에서 3 epoch의 `0.600`까지 개선됐고, 이후 소폭 상승해 3 epoch 체크포인트를 기준 모델로 선택했습니다. 이 흐름은 수동 라벨 데이터에 맞춘 파인튜닝이 학습되었고 적절한 종료 시점을 선택했다는 근거로 사용했습니다.
 
 ![KcELECTRA epoch별 검증 loss](./visualizations/sentiment_validation.png)
 
-분류 품질은 Accuracy 하나보다 Macro-F1·클래스별 recall·confusion matrix를 함께 보는 평가 체계로 정의했습니다. 최종 실행 기록에는 epoch별 validation loss가 보존되어 있어 이를 현재 성능 근거로 제시하며, 검증 예측값을 복원할 수 있을 때는 [`evaluate_sentiment.py`](./scripts/evaluate_sentiment.py)로 동일 기준의 지표를 바로 산출할 수 있습니다. 모델 기록과 해석 기준은 [분석 근거와 적용 범위](./reports/ANALYSIS_EVIDENCE.md)에 정리했습니다.
+분류 품질은 Accuracy 하나보다 Macro-F1·클래스별 recall·confusion matrix를 함께 보는 평가 체계로 정의했습니다. 원문을 제거한 [학습 집계 기록](./data/derived/reported_evidence.json)에 epoch별 validation loss가 보존되어 있어 이를 현재 성능 근거로 제시하며, 검증 예측값을 복원할 수 있을 때는 [`evaluate_sentiment.py`](./scripts/evaluate_sentiment.py)로 동일 기준의 지표를 바로 산출할 수 있습니다. 모델 기록과 해석 기준은 [분석 근거와 적용 범위](./reports/ANALYSIS_EVIDENCE.md)에 정리했습니다.
 
 ### 3. 부정 게시글의 고민 주제를 4개 토픽으로 정리
 
@@ -103,7 +105,7 @@ flowchart LR
 
 AI 챗봇은 프로그램 탐색과 상담 연결을 돕는 보조 채널로 한정합니다. 감정 점수만으로 정신건강 상태를 진단하거나 고위험 학생을 자동 분류하지 않습니다.
 
-## 프로젝트에서 보여 준 역량
+## 주요 분석 판단
 
 - 비정형 한국어 텍스트를 감정·토픽·운영 유형으로 연결하는 분석 설계
 - 커뮤니티 데이터와 설문 결과를 함께 해석하는 혼합 방법 접근
@@ -120,7 +122,7 @@ AI 챗봇은 프로그램 탐색과 상담 연결을 돕는 보조 채널로 한
 - [데이터 구조와 개인정보 처리](./data/README.md)
 - [부정 토픽 탐색 시각화](./reports/부정_토픽_모델링_시각화.html)
 
-`00`–`03` 노트북은 당시 Colab·로컬 환경에서 진행한 데이터 탐색, 모델 비교와 최종 분석의 작업 기록입니다. 처음 보는 독자는 프로젝트의 판단 흐름을 한 번에 볼 수 있는 [`portfolio_summary.ipynb`](./notebooks/portfolio_summary.ipynb)를 먼저 확인한 뒤 세부 노트북을 따라갈 수 있습니다.
+`00`–`03` 노트북은 당시 Colab·로컬 환경에서 진행한 데이터 탐색, 모델 비교와 최종 분석의 작업 기록입니다. 처음 보는 독자는 프로젝트의 판단 흐름을 한 번에 볼 수 있는 [`portfolio_summary.ipynb`](./notebooks/portfolio_summary.ipynb)를 먼저 확인한 뒤 세부 노트북의 코드를 따라갈 수 있습니다. `00`–`03` 노트북의 출력과 실행 번호는 원문·설문 응답 미리보기 노출을 막기 위해 과거 커밋에서도 제거했습니다.
 
 ## 분석 범위와 한계
 
@@ -137,10 +139,14 @@ AI 챗봇은 프로그램 탐색과 상담 연결을 돕는 보조 채널로 한
 
 ```bash
 python -m venv .venv
+# macOS/Linux
 source .venv/bin/activate
+# Windows PowerShell에서는 .\.venv\Scripts\Activate.ps1
 pip install -r requirements-portfolio.txt
 make check
 ```
+
+Make가 없는 환경에서는 `python scripts/build_portfolio_assets.py`, `python scripts/build_summary_notebook.py`, `jupyter nbconvert --to notebook --execute --inplace notebooks/portfolio_summary.ipynb`, `python -m unittest discover -s tests`, `python scripts/validate_repository.py` 순서로 확인합니다.
 
 원문을 이용한 전체 모델 학습에는 별도의 데이터 이용 권한, Mecab 설치와 `requirements.txt` 환경이 필요합니다. 크롤러는 연구 당시 수집 과정을 기록한 코드이며 플랫폼 약관·연구윤리·접근 권한을 확인한 경우에만 제한적으로 사용해야 합니다.
 

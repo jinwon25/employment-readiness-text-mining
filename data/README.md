@@ -45,4 +45,4 @@
 2. `notebooks/01_메인_분석.ipynb`의 전처리 흐름으로 `processed/` 데이터를 만듭니다.
 3. 감정 분류는 `03_감정_분류.ipynb`, 부정 토픽은 `02_부정_토픽_모델링.ipynb`에서 확인합니다.
 
-기존 노트북은 당시 Colab·로컬 절대경로를 포함한 분석 기록입니다. 포트폴리오 핵심 결과는 원문 없이 실행되는 `notebooks/portfolio_summary.ipynb`에서 확인할 수 있습니다.
+기존 노트북은 당시 Colab·로컬 절대경로를 포함한 분석 기록입니다. 공개 집계 결과는 원문 없이 실행되는 `notebooks/portfolio_summary.ipynb`에서 확인할 수 있습니다.
